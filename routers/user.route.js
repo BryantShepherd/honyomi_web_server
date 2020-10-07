@@ -52,7 +52,7 @@ router.post("/register", async (req, res, next) => {
   try {
     let user = await userService.createUser(newUser);
     delete user.password;
-    return responseUtil.success(res, 200, user);
+    return responseUtil.success(res, 201, user);
   } catch (err) {
     if (err instanceof UniqueViolationError) {
       err.status = 409;
