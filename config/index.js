@@ -7,6 +7,8 @@ exports.Regex = {
 exports.HTTPErrorMessage = {
   DEFAULT: "Something went wrong",
   WRONG_EMAIL_OR_PASSWORD: "WRONG_EMAIL_OR_PASSWORD",
+  EMAIL_ALREADY_EXISTED: "EMAIL_ALREADY_EXISTED",
+  REQUIRED_FIELDS_MISSING: "REQUIRED_FIELDS_MISSING",
 };
 
 exports.COOKIE_SECRET = process.env.COOKIE_SECRET || "abcxyz";

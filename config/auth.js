@@ -3,15 +3,27 @@ const JWTStrategy = require("passport-jwt").Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
 const jwt = require("jsonwebtoken");
 const secretOrKey = process.env.PASSPORT_SECRET || "secretOrKey";
+const { userService } = require("../services");
 
-// TODO: Extract JWT Token from cookie
 const options = {
   secretOrKey,
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
 };
 
-// TODO: Implement token verification
-const verify = async (payload, done) => {};
+const verify = async (payload, done) => {
+  const userId = payload.id;
+  if (!userId) {
+    return done(null, false);
+  }
+
+  try {
+    let user = await userService.getUserById(userId);
+    if (!user) return done(null, false);
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
+};
 
 passport.use(new JWTStrategy(options, verify));
 
