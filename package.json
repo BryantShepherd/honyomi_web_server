@@ -8,6 +8,7 @@
     "debug": "cross-env DEBUG=* NODE_ENV=development nodemon ./bin/www",
     "lint:prettier": "prettier --write . --loglevel warn",
     "lint:eslint": "eslint --fix",
+    "migrate:make": "knex migrate:make --knexfile ./config/knexfile.js",
     "migrate:up": "knex migrate:latest --knexfile ./config/knexfile.js",
     "migrate:down": "knex migrate:down --knexfile ./config/knexfile.js",
     "seed:make": "knex seed:make --knexfile ./config/knexfile.js",

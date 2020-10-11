@@ -29,6 +29,8 @@ DATABASE_USERNAME=root
 
 3. Execute this command `npm run migrate:up`. This will run the latest migration files found in `/databases/migrations`.
 
+**Note**: Sometimes, stuff happens... If any error popped up during this process, please consider dropping and creating the database again, then rerun `npm run migrate:up`.
+
 ## Add placeholder data
 
 ```sh
