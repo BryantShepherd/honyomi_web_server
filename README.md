@@ -8,7 +8,7 @@ npm run dev
 
 ## Start development server (debugging)
 
-This script prints out every error message possible in the application to ease the debugging process. It also automatically restarts the server after a file save. 
+This script prints out every error message possible in the application to ease the debugging process. It also automatically restarts the server after a file save.
 
 ```sh
 npm run debug
@@ -20,7 +20,7 @@ npm run debug
 
 2. Create an `.env` file from the given `.env.example` file to configure MySQL Server connection. For example:
 
-```
+```txt
 DATABASE_NAME=remind_clone
 DATABASE_PASSWORD=password
 DATABASE_HOST=localhost
@@ -36,3 +36,7 @@ DATABASE_USERNAME=root
 ```sh
 npm run seed:run
 ```
+
+## Troubleshooting
+
+In case of merge conflicts with `package-lock.json` after pulling from the server, try resolving the conflicts, then run `npm install --package-lock-only` to reconfigure `package-lock.json`.

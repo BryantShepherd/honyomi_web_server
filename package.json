@@ -13,7 +13,8 @@
     "migrate:down": "knex migrate:down --knexfile ./config/knexfile.js",
     "seed:make": "knex seed:make --knexfile ./config/knexfile.js",
     "seed:run": "knex seed:run --knexfile ./config/knexfile.js",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "test": "jest --forceExit"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -38,7 +39,9 @@
   "devDependencies": {
     "cross-env": "^7.0.2",
     "eslint": "^7.4.0",
+    "jest": "^26.5.2",
     "nodemon": "^2.0.4",
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "supertest": "^5.0.0"
   }
 }
