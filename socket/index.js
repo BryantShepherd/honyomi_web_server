@@ -7,3 +7,10 @@ exports.listen = (httpServer) => {
     socket.send("socket.io setup success");
   });
 };
+
+/**
+ * TESTING PURPOSE ONLY
+ */
+exports.get = () => {
+  return io;
+}

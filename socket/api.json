@@ -2,22 +2,72 @@
   "version": "0.1.0",
   "namespaces": {
     "default": {
-      "auth": {
-        "header": ""
+      "options": {
+        "query": {
+          "auth": {
+            "type": "String",
+            "description": "JWT Login Token",
+            "example": "eyJhbGciOiJIUzI1NiIsIn..."
+          }
+        }
       },
       "events": {
-        "eventName": {
+        "message": {
           "emit": {
-            "args": [],
-            "description": ""
+            "parameters": [{
+              "type": "*",
+              "name": "message",
+              "required": true
+            }],
+            "summary": "Sending a new 'message' event"
           },
           "on": {
-            "args": [],
-            "description": ""
+            "parameters": [{
+              "type": "*",
+              "name": "message",
+              "required": true
+            }],
+            "summary": "Receiving a new 'message' event"
           }
         }
       }
     },
-    "message": {}
+    "message": {
+      "options": {
+        "query": {
+          "auth": {
+            "type": "String",
+            "description": "JWT Login Token",
+            "example": "eyJhbGciOiJIUzI1NiIsIn..."
+          }
+        }
+      },
+      "events": {
+        "NEW_MESSAGE": {
+          "on": {
+            "parameters": [{
+              "name": "newMessage",
+              "schema": {
+                "$ref": "#/definitions/Message"
+              },
+              "description": "New Message from someone"
+            }]
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Message": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "sender_id": {
+          "type": "integer"
+        }
+      }
+    }
   }
 }
