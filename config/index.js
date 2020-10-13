@@ -11,6 +11,15 @@ exports.HTTPErrorMessage = {
   REQUIRED_FIELDS_MISSING: "REQUIRED_FIELDS_MISSING",
 };
 
+exports.SocketIOEvent = {
+  common: {
+    JOIN_CHANNEL: "JOIN_CHANNEL",
+  },
+  message: {
+    NEW_MESSAGE: "NEW_MESSAGE",
+  },
+};
+
 exports.COOKIE_SECRET = process.env.COOKIE_SECRET || "abcxyz";
 
 exports.BCRYPT_SALT_ROUND = 2;

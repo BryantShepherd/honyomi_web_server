@@ -3,16 +3,6 @@ const app = require("../../app");
 const knex = require("../../databases/knex");
 const auth = require("../../config/auth");
 
-// Create `test_remind_clone` database before runnign the tests.
-beforeAll(async () => {
-  await knex.migrate.latest();
-  return knex.seed.run();
-});
-
-afterAll(async () => {
-  return knex.migrate.down();
-});
-
 let validToken = null;
 test("Log the right user in", async () => {
   const res = await request(app)

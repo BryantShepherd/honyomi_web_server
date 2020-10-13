@@ -25,3 +25,16 @@ exports.createUser = (user) => {
   const newUser = User.fromJson(user);
   return User.query().insert(newUser);
 };
+
+/**
+ * Returns ids of the conversation this user is in.
+ * @param {Number} userId
+ * @returns {Promise<Array>} conversationIds
+ */
+exports.getUserConversationIds = (userId) => {
+  const knex = User.knex();
+  return knex("participant")
+    .select("conversation_id")
+    .where("user_id", userId)
+    .then((res) => res.map((item) => item["conversation_id"]));
+};

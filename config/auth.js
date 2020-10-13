@@ -1,3 +1,5 @@
+"use strict";
+
 const passport = require("passport");
 const JWTStrategy = require("passport-jwt").Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
@@ -48,5 +50,21 @@ exports.jwtAuth = () => {
   return passport.authenticate("jwt", { session: false });
 };
 
-// TODO: Implement socket authentication
-exports.socketAuth = () => {};
+/**
+ * Authenticate socket connection by checking for
+ * jwt token during handshake.
+ */
+exports.socketAuth = (socket, next) => {
+  const token = socket.handshake.query.token;
+  if (!token) return next(new Error("Authentication Error"));
+  jwt.verify(token, secretOrKey, async (err, payload) => {
+    if (err) {
+      next(err);
+    }
+    let user = await userService
+      .getUserById(payload.id)
+      .modify("excludePassword");
+    socket.user = user;
+    next();
+  });
+};
