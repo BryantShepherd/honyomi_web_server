@@ -8,7 +8,7 @@ const getClassrooms = async (req, res, next) => {
     let query = req.query;
     const classrooms = await Classroom.query()
         .where(query);
-    return res.status(200).json(classrooms);
+    return responseUtil.success(res, 200, classrooms);
   } catch (err) {
     next(err);
   }
@@ -24,7 +24,7 @@ const postClassroom = async (req, res, next) => {
           school: school
         });
 
-    return res.status(201).json(classroom);
+    return responseUtil.success(res, 201, classroom);
   } catch (err) {
     next(err);
   }
@@ -41,7 +41,7 @@ const middleware = async (req, res, next) => {
       req.classroomId = classroomId;
       return next();
     }
-    return res.sendStatus(404);
+    return responseUtil.error(res, 404);
   } catch (err) {
     next(err);
   }
@@ -50,7 +50,7 @@ const middleware = async (req, res, next) => {
 const getClassroom = async (req, res, next) => {
   try {
     const classroom = req.classroom;
-    return res.status(200).json(classroom);
+    return responseUtil.success(res, 200, classroom);
   } catch (err) {
     next(err);
   }
@@ -64,9 +64,9 @@ const putClassroom = async (req, res, next) => {
     classroom.school = req.body.school;
     classroom.name = req.body.name;
 
-    const newClassroom = await Classroom.query()
-        .updateAndFetchById(req.classroomId, classroom)
-    return res.status(202).json(newClassroom);
+    const newClassroom = await classroom.$query().updateAndFetch();
+
+    return responseUtil.success(res, 202, newClassroom);
   } catch (err) {
     next(err);
   }
@@ -80,16 +80,9 @@ const patchClassroom = async (req, res, next) => {
       delete req.body.id;
     }
 
-    Object.entries(req.body).forEach((item) => {
-      const key = item[0];
-      const value =item[1];
-      classroom[key] = value;
-    });
+    const newClassroom = await classroom.$query().patchAndFetch(req.body);
 
-    const newClassroom = await Classroom.query()
-        .patchAndFetchById(req.classroomId, classroom);
-
-    return res.status(202).json(newClassroom);
+    return responseUtil.success(res, 202, newClassroom);
   } catch (err) {
     next(err);
   }
@@ -97,10 +90,9 @@ const patchClassroom = async (req, res, next) => {
 
 const deleteClassroom = async (req, res, next) => {
   try {
-    const classroom = await Classroom.query()
-        .deleteById(req.classroomId);
+    await req.classroom.$query().delete();
 
-    return res.sendStatus(202);
+    return responseUtil.success(res, 202);
   } catch (err) {
     next(err);
   }
