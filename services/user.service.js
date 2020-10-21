@@ -38,3 +38,24 @@ exports.getUserConversationIds = (userId) => {
     .where("user_id", userId)
     .then((res) => res.map((item) => item["conversation_id"]));
 };
+
+exports.getUserConversations = (userId) => {
+  const knex = User.knex();
+  return knex
+    .raw(
+      "select c.id, coalesce(c.name, group_concat(u.name separator ', ')) as conversation_name ,\
+     c.`type` from participant p inner join conversation c on c.id = p.conversation_id \
+     inner join user u on u.id = p.user_id \
+     where p.conversation_id in \
+     (select p2.conversation_id from participant p2 where p2.user_id = :userId) \
+     and user_id != :userId \
+     group by c.id;",
+      {
+        userId,
+      }
+    )
+    .then((res) => {
+      let data = res[0];
+      return data;
+    });
+};

@@ -44,6 +44,16 @@ exports.registerController = async (req, res, next) => {
   }
 };
 
+exports.conversationController = async (req, res, next) => {
+  const currentUser = req.user;
+  try {
+    let conversations = await userService.getUserConversations(currentUser.id);
+    return responseUtil.success(res, 200, conversations);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.googleRedirectController = (req, res, next) => {
   //TODO: Implement Google Redirect Controller
   return responseUtil.success(res, 200);

@@ -12,7 +12,7 @@ class MessageNamespace {
 
   init() {
     this.joinConvoChannels();
-    this.socket.on(event.NEW_MESSAGE, this._newMessageHandler);
+    this.socket.on(event.NEW_MESSAGE, this._newMessageHandler.bind(this));
   }
 
   joinConvoChannels() {
@@ -58,7 +58,7 @@ class MessageNamespace {
       attachment: message.attachment,
     };
     //TODO: Implement scheduled message
-    fn(broadcastMessage);
+    if (fn) fn(broadcastMessage);
     try {
       let newMessage = await messageService.insertMessage({
         sender_id: message.sender.id,

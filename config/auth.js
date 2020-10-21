@@ -1,4 +1,5 @@
 "use strict";
+//TODO: Implement role-based authorization
 
 const passport = require("passport");
 const JWTStrategy = require("passport-jwt").Strategy;

@@ -29,6 +29,10 @@ class User extends Model {
         )
         .innerJoin("role", "user.role_id", "role.id");
     },
+
+    idAndName(builder) {
+      return builder.select("id", "name");
+    },
   };
 
   static get jsonSchema() {
