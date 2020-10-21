@@ -20,7 +20,7 @@ const verify = async (payload, done) => {
   }
 
   try {
-    let user = await userService.getUserById(userId);
+    let user = await userService.getUserById(userId).modify("excludePassword");
     if (!user) return done(null, false);
     return done(null, user);
   } catch (err) {

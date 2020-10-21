@@ -14,6 +14,7 @@ exports.authenticate = (email, password) => {
       if (!user || !bcrypt.compareSync(password, user.password)) {
         let authErr = new Error(HTTPErrorMessage.WRONG_EMAIL_OR_PASSWORD);
         authErr.status = 401;
+        authErr.httpMessage = HTTPErrorMessage.WRONG_EMAIL_OR_PASSWORD;
         throw authErr;
       }
       delete user.password;

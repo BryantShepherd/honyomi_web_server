@@ -1,7 +1,7 @@
 const responseUtil = require("../utils/responseUtils");
 const { userService } = require("../services");
 const auth = require("../config/auth");
-const { BCRYPT_SALT_ROUND } = require("../config");
+const { BCRYPT_SALT_ROUND, PASSWORD_REGEX } = require("../config");
 const bcrypt = require("bcrypt");
 const { UniqueViolationError, ValidationError } = require("objection");
 const { HTTPErrorMessage } = require("../config");
@@ -54,7 +54,45 @@ exports.conversationController = async (req, res, next) => {
   }
 };
 
-exports.googleRedirectController = (req, res, next) => {
-  //TODO: Implement Google Redirect Controller
-  return responseUtil.success(res, 200);
+exports.getUserProfile = async (req, res, next) => {
+  try {
+    let loggedInUser = req.user;
+    let data = await loggedInUser.$query().modify("includeRole");
+    delete data.password;
+    return responseUtil.success(res, 200, data);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+/**
+ * Update user password
+ * @param {String} req.body.currentPass
+ * @param {String} req.body.updatePass
+ */
+exports.updatePassword = async (req, res, next) => {
+  try {
+    const { currentPass, updatePass } = req.body;
+    let loggedInUser = req.user;
+
+    if (!PASSWORD_REGEX.test(updatePass)) {
+      return responseUtil.error(res, 400, "WEAK_PASSWORD");
+    }
+
+    let userPassword = (await loggedInUser.$query()).password;
+    let passwordMatched = bcrypt.compareSync(currentPass, userPassword);
+    if (!passwordMatched) {
+      return responseUtil.error(res, 401, "WRONG_PASSWORD");
+    }
+
+    let hashedPassword = bcrypt.hashSync(updatePass, BCRYPT_SALT_ROUND);
+
+    await loggedInUser.$query().patch({
+      password: hashedPassword,
+    });
+
+    return responseUtil.success(res, 200);
+  } catch (err) {
+    return next(err);
+  }
 };

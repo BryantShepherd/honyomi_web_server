@@ -16,4 +16,8 @@ router.get(
   userController.conversationController
 );
 
+router.get("/profile", auth.jwtAuth(), userController.getUserProfile);
+
+router.put("/password", auth.jwtAuth(), userController.updatePassword);
+
 module.exports = router;

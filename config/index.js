@@ -23,3 +23,5 @@ exports.SocketIOEvent = {
 exports.COOKIE_SECRET = process.env.COOKIE_SECRET || "abcxyz";
 
 exports.BCRYPT_SALT_ROUND = 2;
+
+exports.PASSWORD_REGEX = /^[\w@$!%*#?&]{8,}$/;
