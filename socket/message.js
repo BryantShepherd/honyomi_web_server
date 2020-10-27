@@ -1,18 +1,34 @@
 const event = require("../config").SocketIOEvent.message;
+const errorMsg = require("../config").SocketErrorMessage;
 const Message = require("../models/Message");
 const { messageService, userService } = require("../services");
 const scheduleUtil = require("../utils/scheduleUtils");
 const debug = require("debug")("remind-clone:socket:message");
 
 class MessageNamespace {
+  /**
+   *
+   * @param {import("socket.io").Socket} socket
+   * @param {import("socket.io").Namespace} nsp
+   */
   constructor(socket, nsp) {
     this.socket = socket;
     this.nsp = nsp;
   }
 
   init() {
+    this.joinUserChannel();
     this.joinConvoChannels();
     this.socket.on(event.NEW_MESSAGE, this._newMessageHandler.bind(this));
+    this.socket.on(
+      event.NEW_GROUP_CONVERSATION,
+      this._newGroupConversationHandler.bind(this)
+    );
+  }
+
+  joinUserChannel() {
+    let userId = this.socket.user.id;
+    this.socket.join(`user#${userId}`);
   }
 
   joinConvoChannels() {
@@ -58,11 +74,11 @@ class MessageNamespace {
       attachment: message.attachment,
     };
     //TODO: Implement scheduled message
-    if (fn) fn(broadcastMessage);
+    // if (fn) fn(null, broadcastMessage);
     try {
       let newMessage = await messageService.insertMessage({
         sender_id: message.sender.id,
-        conversation_id: message.conversation.id,
+        conversation_id: message.conversation.id, //TODO: check if the user is in that conversation
         message: message.message.richText || message.message.text,
         message_text: message.message.text,
         attachment_id: message.attachment ? message.attachment.id : undefined,
@@ -72,6 +88,73 @@ class MessageNamespace {
       this.nsp.in(convoChannel).emit(event.NEW_MESSAGE, broadcastMessage);
     } catch (err) {
       debug(err);
+      if (fn) fn(new Error(errorMsg.DEFAULT));
+    }
+  }
+
+  /**
+   * Handle NEW_GROUP_CONVERSATION event
+   * @param {Object} data
+   * @param {Function} fn
+   */
+  async _newGroupConversationHandler(data, fn) {
+    const {
+      sender,
+      message,
+      createdAt,
+      receiverIds,
+      canReply,
+      attachment,
+      classroomId,
+    } = data;
+
+    let allUserIds = [sender.id, ...receiverIds];
+    try {
+      // Create new conversation in db
+      let newConvoId = await messageService.createNewConversation(
+        {
+          type: "group",
+          creator_id: sender.id,
+          classroom_id: classroomId,
+        },
+        allUserIds
+      );
+      // Subscribe all user involved to this conversation (socket.io)
+      let newConvoChannel = `convo#${newConvoId}`;
+
+      // Get all clients of users inside this conversation and join
+      // them all.
+      let allUserChannels = allUserIds.map((id) => `user#${id}`);
+      allUserChannels.forEach((channel) => {
+        let sockets = Object.values(this.nsp.in(channel).sockets);
+        sockets.forEach((s) => {
+          s.join(newConvoChannel);
+        });
+      });
+      // Add new message in db
+      let broadcastMessage = {
+        sender: sender,
+        message: message.richText || message.text,
+        createdAt: createdAt,
+        conversationId: newConvoId,
+        canReply: canReply || true,
+        attachment: attachment,
+      };
+
+      let newMessage = await messageService.insertMessage({
+        sender_id: sender.id,
+        conversation_id: newConvoId, //TODO: check if the user is in that conversation
+        message: message.richText || message.text,
+        message_text: message.text,
+        attachment_id: attachment ? attachment.id : undefined,
+      });
+      broadcastMessage.id = newMessage.id;
+
+      // Emit the new message to socket subscribing to this conversation
+      this.nsp.in(newConvoChannel).emit(event.NEW_MESSAGE, broadcastMessage);
+    } catch (err) {
+      debug(err);
+      if (fn) fn(new Error(errorMsg.DEFAULT));
     }
   }
 }

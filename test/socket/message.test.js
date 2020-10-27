@@ -71,12 +71,12 @@ describe("NEW_MESSAGE", () => {
     };
   });
 
-  test("handle text-only", (done) => {
-    socket.emit(event.NEW_MESSAGE, message, (ack) => {
-      expect(ack).toBeDefined();
-      done();
-    });
-  });
+  // test("handle text-only", (done) => {
+  //   socket.emit(event.NEW_MESSAGE, message, (ack) => {
+  //     expect(ack).toBeDefined();
+  //     done();
+  //   });
+  // });
 
   test("get broadcast message", (done) => {
     socket.on(event.NEW_MESSAGE, (message) => {
@@ -84,5 +84,33 @@ describe("NEW_MESSAGE", () => {
       done();
     });
     socket.emit(event.NEW_MESSAGE, message, (ack) => {});
+  });
+});
+
+describe("NEW_GROUP_MESSAGE", () => {
+  let message;
+  beforeAll(() => {
+    message = {
+      sender: {
+        id: 1,
+      },
+      classroomId: 1,
+      receiverIds: [2, 3],
+      message: {
+        text: "Hello",
+      },
+    };
+  });
+  test("create group conversation", (done) => {
+    socket.on(event.NEW_MESSAGE, (message) => {
+      expect(message).toBeDefined();
+      expect(message.id).toBeDefined();
+      done();
+    });
+    socket.emit(event.NEW_GROUP_CONVERSATION, message, (err) => {
+      if (err) {
+        done(err);
+      }
+    });
   });
 });

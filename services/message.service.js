@@ -1,4 +1,5 @@
 const Message = require("../models/Message");
+const Conversation = require("../models/Conversation");
 
 /**
  * Insert a new message.
@@ -20,4 +21,28 @@ exports.getConversationMessages = (conversationId) => {
     )
     .where("conversation_id", conversationId)
     .withGraphFetched("[sender(idAndName), attachment]");
+};
+
+/**
+ * Create new conversation with the following members in it
+ * @param {Conversation} conversation
+ * @param {Array<Number>} memberIds
+ */
+exports.createNewConversation = async (conversation, memberIds) => {
+  const knex = Conversation.knex();
+  try {
+    let newConvo = Conversation.fromJson(conversation);
+    const { id: newConvoId } = await Conversation.query().insert(newConvo);
+
+    return knex("participant").insert(
+      memberIds.map((memberId) => {
+        return {
+          conversation_id: newConvoId,
+          user_id: memberId,
+        };
+      })
+    ).then(() => newConvoId);
+  } catch (err) {
+    throw err;
+  }
 };

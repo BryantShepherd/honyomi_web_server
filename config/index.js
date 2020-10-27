@@ -17,7 +17,12 @@ exports.SocketIOEvent = {
   },
   message: {
     NEW_MESSAGE: "NEW_MESSAGE",
+    NEW_GROUP_CONVERSATION: "NEW_GROUP_CONVERSATION",
   },
+};
+
+exports.SocketErrorMessage = {
+  DEFAULT: "Something went wrong",
 };
 
 exports.COOKIE_SECRET = process.env.COOKIE_SECRET || "abcxyz";
