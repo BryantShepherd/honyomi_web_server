@@ -1,13 +1,10 @@
 const responseUtil = require("../utils/responseUtils");
-const { userService } = require("../services");
-const Classroom = require("../models/Classroom");
-
+const classroomService = require("../services/classroom.service");
 
 const getClassrooms = async (req, res, next) => {
   try {
     let query = req.query;
-    const classrooms = await Classroom.query()
-        .where(query);
+    const classrooms = await classroomService.getAllClassrooms(query);
     return responseUtil.success(res, 200, classrooms);
   } catch (err) {
     next(err);
@@ -16,14 +13,14 @@ const getClassrooms = async (req, res, next) => {
 
 const postClassroom = async (req, res, next) => {
   try {
+    const user = req.user;
     const {code, name, school} = req.body;
-    const classroom = await Classroom.query()
-        .insert({
-          code: code,
-          name: name,
-          school: school
-        });
-
+    const classroom = await classroomService.createClassroom({
+      code: code,
+      name: name,
+      school: school,
+    });
+    await classroomService.setOwnerClassroom(classroom, user);
     return responseUtil.success(res, 201, classroom);
   } catch (err) {
     next(err);
@@ -33,8 +30,7 @@ const postClassroom = async (req, res, next) => {
 const middleware = async (req, res, next) => {
   try {
     const classroomId = parseInt(req.params.classroomId);
-    const classroom = await Classroom.query()
-        .findById(classroomId);
+    const classroom = await classroomService.getClassroom(classroomId);
 
     if (classroom) {
       req.classroom = classroom;
@@ -60,12 +56,14 @@ const putClassroom = async (req, res, next) => {
   try {
     const classroom = req.classroom;
 
-    classroom.code = req.body.code;
-    classroom.school = req.body.school;
-    classroom.name = req.body.name;
+    const {code, school, name} = req.body;
 
-    const newClassroom = await classroom.$query().updateAndFetch();
-
+    const newClassroom = await classroomService.updateClassroom(classroom,
+        {
+          code: code,
+          school: school,
+          name: name,
+        });
     return responseUtil.success(res, 202, newClassroom);
   } catch (err) {
     next(err);
@@ -75,12 +73,10 @@ const putClassroom = async (req, res, next) => {
 const patchClassroom = async (req, res, next) => {
   try {
     const classroom = req.classroom;
-
     if (req.body.id) {
       delete req.body.id;
     }
-
-    const newClassroom = await classroom.$query().patchAndFetch(req.body);
+    const newClassroom = await classroomService.patchClassroom(classroom, req.body);
 
     return responseUtil.success(res, 202, newClassroom);
   } catch (err) {
@@ -90,9 +86,9 @@ const patchClassroom = async (req, res, next) => {
 
 const deleteClassroom = async (req, res, next) => {
   try {
-    await req.classroom.$query().delete();
-
-    return responseUtil.success(res, 202);
+    const classroom = req.classroom;
+    await classroomService.deleteClassroom(classroom);
+    return responseUtil.success(res, 202, {});
   } catch (err) {
     next(err);
   }
