@@ -61,6 +61,28 @@ describe("POST /user/auth/login", () => {
 
       expect(res.status).toBe(401);
     });
+
+    test("GET /user/profile", async () => {
+      const res = await request(app)
+        .get(`/api/user/profile`)
+        .set("Authorization", `Bearer ${validToken}`);
+
+      expect(res.body.data).toMatchObject({
+        id: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        role: expect.any(String),
+      });
+    });
+
+    test("PUT /user/password", async () => {
+      const res = await request(app).put("/api/user/password").send({
+        currentPass: "password",
+        updatePass: "newPassword",
+      });
+
+      expect(res.body).toEqual({});
+    });
   });
 });
 
@@ -96,5 +118,12 @@ function sendInvalidLoginRequest() {
   return request(app).post(`${API_USER_AUTH}/login`).send({
     email: "definitely.wrong.email@gmail.com",
     password: "incorrectpassword",
+  });
+}
+
+function sendLoginRequest(email, password) {
+  return request(app).post(`${API_USER_AUTH}/login`).send({
+    email,
+    password,
   });
 }

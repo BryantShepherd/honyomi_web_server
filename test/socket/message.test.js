@@ -34,6 +34,7 @@ beforeAll(async (done) => {
 
 afterAll(() => {
   httpServer.close();
+  socket.close();
 });
 
 describe("Basic Connection", () => {
@@ -93,6 +94,7 @@ describe("NEW_GROUP_MESSAGE", () => {
     message = {
       sender: {
         id: 1,
+        name: "Koro",
       },
       classroomId: 1,
       receiverIds: [2, 3],

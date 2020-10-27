@@ -95,6 +95,14 @@ class MessageNamespace {
   /**
    * Handle NEW_GROUP_CONVERSATION event
    * @param {Object} data
+   * @param {Object} data.sender
+   * @param {Object} data.message
+   * @param {Boolean} [data.canReply]
+   * @param {Object} [data.attachment]
+   * @param {Number} data.classroomId
+   * @param {Array<Number>} data.receiverIds
+   * @param {Date | String} data.createdAt
+   * @param {Date | String} [data.scheduledAt]
    * @param {Function} fn
    */
   async _newGroupConversationHandler(data, fn) {

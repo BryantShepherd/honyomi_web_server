@@ -19,6 +19,7 @@ beforeAll((done) => {
 
 afterAll((done) => {
   httpServer.close();
+  socket.close();
   done();
 });
 
