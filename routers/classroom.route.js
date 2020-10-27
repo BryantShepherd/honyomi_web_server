@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const classroomController = require("../controllers/classroom.controller");
+const auth = require("../config/auth");
+
+router.use("/", auth.jwtAuth());
 
 router.route("/")
   .get(classroomController.getClassrooms)
