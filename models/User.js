@@ -1,5 +1,6 @@
 const Model = require("objection").Model;
 const knex = require("../databases/knex");
+const path = require("path");
 
 Model.knex(knex);
 
@@ -46,6 +47,35 @@ class User extends Model {
         role_id: { type: "number" },
       },
     };
+  }
+
+  static relationMappings = {
+    classroom_owner: {
+      relation: Model.ManyToManyRelation,
+      modelClass: path.join(__dirname, "Classroom"),
+      filter: query => query.select("id", "code", "name", "school"),
+      join: {
+        from: "user.id",
+        through: {
+          from: "class_owner.teacher_id",
+          to: "class_owner.classroom_id"
+        },
+        to: "classroom.id",
+      }
+    },
+    classroom_joined: {
+      relation: Model.ManyToManyRelation,
+      modelClass: path.join(__dirname, "Classroom"),
+      filter: query => query.select("id", "code", "name", "school"),
+      join: {
+        from: "user.id",
+        through: {
+          from: "m_student_classroom.student_id",
+          to: "m_student_classroom.classroom_id"
+        },
+        to: "classroom.id"
+      }
+    }
   }
 }
 

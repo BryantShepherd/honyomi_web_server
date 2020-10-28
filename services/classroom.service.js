@@ -1,6 +1,24 @@
 const Classroom = require("../models/Classroom");
 const User = require("../models/User");
 
+/**
+ *
+ * @param {User} user
+ * @param query
+ */
+function getClassroomOwner(user, query) {
+  return user.$relatedQuery("classroom_owner").where(query);
+}
+
+/**
+ *
+ * @param {User} user
+ * @param query
+ */
+function getClassroomJoined(user, query) {
+  return user.$relatedQuery("classroom_joined").where(query);
+}
+
 function getAllClassrooms(query) {
   return Classroom.query().where(query);
 }
@@ -105,5 +123,6 @@ module.exports = {
   getStudents,
   joinClassroom,
   leaveClassroom,
-
+  getClassroomOwner,
+  getClassroomJoined
 }

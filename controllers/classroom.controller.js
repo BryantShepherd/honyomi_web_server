@@ -4,9 +4,15 @@ const classroomService = require("../services/classroom.service");
 const getClassrooms = async (req, res, next) => {
   try {
     let query = req.query;
-    const classrooms = await classroomService.getAllClassrooms(query);
-    return responseUtil.success(res, 200, classrooms);
+    let user = req.user;
+    const classroomsOwner = await classroomService.getClassroomOwner(user, query);
+    const classroomsJoined = await classroomService.getClassroomJoined(user, query);
+    return responseUtil.success(res, 200, {
+      owner: classroomsOwner,
+      joined: classroomsJoined,
+    });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 }
