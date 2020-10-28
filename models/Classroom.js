@@ -29,6 +29,7 @@ class Classroom extends Model {
     owner: {
       relation: Model.ManyToManyRelation,
       modelClass: User,
+      filter: query => query.select('id', 'name', 'email'),
       join: {
         from: "classroom.id",
         through: {
@@ -41,6 +42,7 @@ class Classroom extends Model {
     students: {
       relation: Model.ManyToManyRelation,
       modelClass: User,
+      filter: query => query.select('id', 'name', 'email'),
       join: {
         from: "classroom.id",
         through: {
