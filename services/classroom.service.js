@@ -31,6 +31,26 @@ function getStudents(classroom) {
 }
 
 /**
+ *
+ * @param {User|Model} user
+ * @param {Classroom} classroom
+ */
+function joinClassroom(user, classroom) {
+  return classroom.$relatedQuery("students").relate(user);
+}
+
+/**
+ *
+ * @param {User|Model} user
+ * @param {Classroom} classroom
+ */
+function leaveClassroom(user, classroom) {
+  return classroom.$relatedQuery("students")
+      .unrelate()
+      .where(user);
+}
+
+/**
  * Create new classroom
  * @param {Classroom} classroom
  */
@@ -83,5 +103,7 @@ module.exports = {
   patchClassroom,
   getOwners,
   getStudents,
+  joinClassroom,
+  leaveClassroom,
 
 }

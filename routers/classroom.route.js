@@ -17,10 +17,12 @@ router.route("/:classroomId")
   .patch(classroomController.patchClassroom)
   .delete(classroomController.deleteClassroom)
 
-router.route("/:classroomId/owners")
-    .get(classroomController.getOwners);
+router.get("/:classroomId/owners", classroomController.getOwners)
 
-router.route("/:classroomId/students")
-    .get(classroomController.getStudents);
+router.get("/:classroomId/students", classroomController.getStudents)
+
+router.post("/:classroomId/students/join", classroomController.joinClassroom)
+
+router.post("/:classroomId/students/leave", classroomController.leaveClassroom)
 
 module.exports = router;

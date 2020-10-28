@@ -114,6 +114,32 @@ const getStudents = async (req, res, next) => {
   }
 }
 
+const joinClassroom = async (req, res, next) => {
+  try {
+    const {user, classroom} = req;
+    const response = await classroomService.joinClassroom(user, classroom);
+    if (response) {
+      return responseUtil.success(res, 201, response);
+    }
+    return responseUtil.error(res, 200, "Already joined");
+  } catch (err) {
+    next(err);
+  }
+}
+
+const leaveClassroom = async (req, res, next) => {
+  try {
+    const {user, classroom} = req;
+    const response = await classroomService.leaveClassroom(user, classroom);
+    if (response) {
+      return responseUtil.success(res, 201, response);
+    }
+    return responseUtil.error(res, 200, "Can leave this room");
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getClassrooms,
   postClassroom,
@@ -123,5 +149,8 @@ module.exports = {
   patchClassroom,
   deleteClassroom,
   getOwners,
-  getStudents
+  getStudents,
+  joinClassroom,
+  leaveClassroom,
+
 }
