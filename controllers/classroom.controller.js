@@ -104,6 +104,16 @@ const getOwners = async (req, res, next) => {
   }
 }
 
+const getStudents = async (req, res, next) => {
+  try {
+    const classroom = req.classroom;
+    const students = await classroomService.getStudents(classroom);
+    return responseUtil.success(res, 200, students);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getClassrooms,
   postClassroom,
@@ -112,5 +122,6 @@ module.exports = {
   putClassroom,
   patchClassroom,
   deleteClassroom,
-  getOwners
+  getOwners,
+  getStudents
 }

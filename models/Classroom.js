@@ -37,7 +37,19 @@ class Classroom extends Model {
         },
         to: "user.id"
       }
-    }
+    },
+    students: {
+      relation: Model.ManyToManyRelation,
+      modelClass: User,
+      join: {
+        from: "classroom.id",
+        through: {
+          from: "m_student_classroom.classroom_id",
+          to: "m_student_classroom.student_id"
+        },
+        to: "user.id"
+      }
+    },
   }
 }
 

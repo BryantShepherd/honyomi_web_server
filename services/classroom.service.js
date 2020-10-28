@@ -23,6 +23,14 @@ function getOwners(classroom) {
 }
 
 /**
+ *
+ * @param {Classroom}classroom
+ */
+function getStudents(classroom) {
+  return classroom.$relatedQuery("students").where('status', 'Accepted');
+}
+
+/**
  * Create new classroom
  * @param {Classroom} classroom
  */
@@ -74,5 +82,6 @@ module.exports = {
   updateClassroom,
   patchClassroom,
   getOwners,
+  getStudents,
 
 }

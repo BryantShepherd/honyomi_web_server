@@ -18,5 +18,6 @@ router.route("/:classroomId")
   .delete(classroomController.deleteClassroom)
 
 router.get("/:classroomId/owners", classroomController.getOwners);
+router.get("/:classroomId/students", classroomController.getStudents);
 
 module.exports = router;
