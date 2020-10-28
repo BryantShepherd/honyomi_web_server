@@ -20,7 +20,7 @@ const postClassroom = async (req, res, next) => {
       name: name,
       school: school,
     });
-    await classroomService.setOwnerClassroom(classroom, user);
+    await classroomService.addOwnerClassroom(classroom, user);
     return responseUtil.success(res, 201, classroom);
   } catch (err) {
     next(err);
@@ -94,6 +94,16 @@ const deleteClassroom = async (req, res, next) => {
   }
 }
 
+const getOwners = async (req, res, next) => {
+  try {
+    const classroom = req.classroom;
+    const owners = await classroomService.getOwners(classroom);
+    return responseUtil.success(res, 200, owners);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getClassrooms,
   postClassroom,
@@ -101,5 +111,6 @@ module.exports = {
   getClassroom,
   putClassroom,
   patchClassroom,
-  deleteClassroom
+  deleteClassroom,
+  getOwners
 }

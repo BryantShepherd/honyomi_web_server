@@ -17,4 +17,6 @@ router.route("/:classroomId")
   .patch(classroomController.patchClassroom)
   .delete(classroomController.deleteClassroom)
 
+router.get("/:classroomId/owners", classroomController.getOwners);
+
 module.exports = router;

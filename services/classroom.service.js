@@ -15,6 +15,14 @@ function getClassroom(classroomId) {
 }
 
 /**
+ *
+ * @param {Classroom} classroom
+ */
+function getOwners(classroom) {
+  return classroom.$relatedQuery("owner");
+}
+
+/**
  * Create new classroom
  * @param {Classroom} classroom
  */
@@ -61,8 +69,10 @@ module.exports = {
   getAllClassrooms,
   getClassroom,
   createClassroom,
-  setOwnerClassroom: addOwnerClassroom,
+  addOwnerClassroom,
   deleteClassroom,
   updateClassroom,
-  patchClassroom
+  patchClassroom,
+  getOwners,
+
 }
