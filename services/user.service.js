@@ -40,23 +40,28 @@ exports.getUserConversationIds = (userId) => {
     .then((res) => res.map((item) => item["conversation_id"]));
 };
 
-exports.getUserConversations = (userId) => {
+exports.getUserConversations = (userId, classroomId) => {
   const knex = User.knex();
-  return knex
-    .raw(
-      "select c.id, coalesce(c.name, group_concat(u.name separator ', ')) as conversation_name ,\
-     c.`type` from participant p inner join conversation c on c.id = p.conversation_id \
-     inner join user u on u.id = p.user_id \
-     where p.conversation_id in \
-     (select p2.conversation_id from participant p2 where p2.user_id = :userId) \
-     and user_id != :userId \
-     group by c.id;",
-      {
-        userId,
-      }
+  const subquery = knex({ p2: "participant" })
+    .select("p2.conversation_id")
+    .where("p2.user_id", userId);
+
+  let query = knex({ p: "participant" })
+    .select(
+      "c.id",
+      knex.raw(
+        "coalesce(c.name, group_concat(u.name separator ', ')) as conversation_name"
+      ),
+      "c.type"
     )
-    .then((res) => {
-      let data = res[0];
-      return data;
-    });
+    .innerJoin({ c: "conversation" }, "c.id", "p.conversation_id")
+    .innerJoin({ u: "user" }, "u.id", "p.user_id")
+    .whereIn("p.conversation_id", subquery)
+    .whereNot("user_id", userId);
+
+  if (classroomId) {
+    query = query.where("c.classroom_id", classroomId);
+  }
+  query = query.groupBy("c.id");
+  return query;
 };

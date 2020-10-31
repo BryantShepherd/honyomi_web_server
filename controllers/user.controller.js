@@ -45,9 +45,13 @@ exports.registerController = async (req, res, next) => {
 };
 
 exports.conversationController = async (req, res, next) => {
+  const { classroomId } = req.query;
   const currentUser = req.user;
   try {
-    let conversations = await userService.getUserConversations(currentUser.id);
+    let conversations = await userService.getUserConversations(
+      currentUser.id,
+      classroomId
+    );
     return responseUtil.success(res, 200, conversations);
   } catch (err) {
     next(err);
