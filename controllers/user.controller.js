@@ -70,6 +70,25 @@ exports.getUserProfile = async (req, res, next) => {
 };
 
 /**
+ * Validate and refresh user token
+ * @route /user/validate
+ * @param {Express.Request} req 
+ * @param {Express.Response} res 
+ * @param {Express.NextFunction} next 
+ */
+exports.validateToken = async (req, res, next) => {
+  try {
+    let loggedInUser = req.user;
+    let user = await loggedInUser.$query().modify("includeRole");
+    delete user.password;
+    let token = auth.createUserToken(user);
+    return responseUtil.success(res, 200, { user, token });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+/**
  * Update user password
  * @param {String} req.body.currentPass
  * @param {String} req.body.updatePass

@@ -20,4 +20,6 @@ router.get("/profile", auth.jwtAuth(), userController.getUserProfile);
 
 router.put("/password", auth.jwtAuth(), userController.updatePassword);
 
+router.get("/validate", auth.jwtAuth(), userController.validateToken);
+
 module.exports = router;
