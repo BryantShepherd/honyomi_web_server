@@ -5,8 +5,14 @@ const getClassrooms = async (req, res, next) => {
   try {
     let query = req.query;
     let user = req.user;
-    const classroomsOwner = await classroomService.getClassroomOwner(user, query);
-    const classroomsJoined = await classroomService.getClassroomJoined(user, query);
+    const classroomsOwner = await classroomService.getClassroomOwner(
+      user,
+      query
+    );
+    const classroomsJoined = await classroomService.getClassroomJoined(
+      user,
+      query
+    );
     return responseUtil.success(res, 200, {
       owner: classroomsOwner,
       joined: classroomsJoined,
@@ -15,14 +21,14 @@ const getClassrooms = async (req, res, next) => {
     console.log(err);
     next(err);
   }
-}
+};
 
 const postClassroom = async (req, res, next) => {
   try {
     const user = req.user;
-    const {code, name, school} = req.body;
+    const { code, name, school } = req.body;
     const classroom = await classroomService.createClassroom({
-      code: code,
+      code: generateCode(6),
       name: name,
       school: school,
     });
@@ -31,7 +37,7 @@ const postClassroom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
 
 const middleware = async (req, res, next) => {
   try {
@@ -47,7 +53,7 @@ const middleware = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
 
 const getClassroom = async (req, res, next) => {
   try {
@@ -56,25 +62,24 @@ const getClassroom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
 
 const putClassroom = async (req, res, next) => {
   try {
     const classroom = req.classroom;
 
-    const {code, school, name} = req.body;
+    const { code, school, name } = req.body;
 
-    const newClassroom = await classroomService.updateClassroom(classroom,
-        {
-          code: code,
-          school: school,
-          name: name,
-        });
+    const newClassroom = await classroomService.updateClassroom(classroom, {
+      code: code,
+      school: school,
+      name: name,
+    });
     return responseUtil.success(res, 202, newClassroom);
   } catch (err) {
     next(err);
   }
-}
+};
 
 const patchClassroom = async (req, res, next) => {
   try {
@@ -82,13 +87,16 @@ const patchClassroom = async (req, res, next) => {
     if (req.body.id) {
       delete req.body.id;
     }
-    const newClassroom = await classroomService.patchClassroom(classroom, req.body);
+    const newClassroom = await classroomService.patchClassroom(
+      classroom,
+      req.body
+    );
 
     return responseUtil.success(res, 202, newClassroom);
   } catch (err) {
     next(err);
   }
-}
+};
 
 const deleteClassroom = async (req, res, next) => {
   try {
@@ -98,7 +106,7 @@ const deleteClassroom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
 
 const getOwners = async (req, res, next) => {
   try {
@@ -108,7 +116,7 @@ const getOwners = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
 
 const getStudents = async (req, res, next) => {
   try {
@@ -118,11 +126,11 @@ const getStudents = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
 
 const joinClassroom = async (req, res, next) => {
   try {
-    const {user, classroom} = req;
+    const { user, classroom } = req;
     const response = await classroomService.joinClassroom(user, classroom);
     if (response) {
       return responseUtil.success(res, 201, response);
@@ -131,11 +139,26 @@ const joinClassroom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
+};
+
+const joinClassroomViaCode = async (req, res, next) => {
+  try {
+    const classroomCode = req.params.classroomCode;
+    const {  user  } = req;
+    const classroom = await classroomService.getClassroomViaCode(classroomCode);
+    const response = await classroomService.joinClassroom(user, classroom);
+    if (response) {
+      return responseUtil.success(res, 201, response);
+    }
+    return responseUtil.error(res, 200, "Already joined");
+  } catch (err) {
+    next(err);
+  }
+};
 
 const leaveClassroom = async (req, res, next) => {
   try {
-    const {user, classroom} = req;
+    const { user, classroom } = req;
     const response = await classroomService.leaveClassroom(user, classroom);
     if (response) {
       return responseUtil.success(res, 201, response);
@@ -144,6 +167,17 @@ const leaveClassroom = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+function generateCode(length) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
 
 module.exports = {
@@ -158,5 +192,5 @@ module.exports = {
   getStudents,
   joinClassroom,
   leaveClassroom,
-
-}
+  joinClassroomViaCode,
+};

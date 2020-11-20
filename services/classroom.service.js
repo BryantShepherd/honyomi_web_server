@@ -32,6 +32,10 @@ function getClassroom(classroomId) {
       .findById(classroomId);
 }
 
+function getClassroomViaCode(classroomCode) {
+  return Classroom.query().where("code", classroomCode).first();
+}
+
 /**
  *
  * @param {Classroom} classroom
@@ -114,6 +118,7 @@ function patchClassroom(classroom, newClassroom) {
 module.exports = {
   getAllClassrooms,
   getClassroom,
+  getClassroomViaCode,
   createClassroom,
   addOwnerClassroom,
   deleteClassroom,
@@ -124,5 +129,5 @@ module.exports = {
   joinClassroom,
   leaveClassroom,
   getClassroomOwner,
-  getClassroomJoined
-}
+  getClassroomJoined,
+};
