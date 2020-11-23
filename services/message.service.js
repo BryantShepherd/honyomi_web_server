@@ -33,17 +33,52 @@ exports.createNewConversation = async (conversation, memberIds) => {
   const knex = Conversation.knex();
   try {
     let newConvo = Conversation.fromJson(conversation);
-    const { id: newConvoId } = await Conversation.query().insert(newConvo);
+    const resConvo = await Conversation.query().insert(newConvo);
 
-    return knex("participant").insert(
+    await knex("participant").insert(
       memberIds.map((memberId) => {
         return {
-          conversation_id: newConvoId,
+          conversation_id: newConvo.id,
           user_id: memberId,
         };
       })
-    ).then(() => newConvoId);
+    );
+
+    return resConvo;
   } catch (err) {
     throw err;
   }
+};
+
+exports.getConversationMembers = (convoId) => {
+  const knex = Conversation.knex();
+
+  return knex("user")
+    .select("id", "name", "avatar_url")
+    .innerJoin("participant", "user.id", "participant.user_id")
+    .where("participant.conversation_id", convoId);
+};
+
+exports.getConversationDetail = (convoId) => {
+  return Conversation.query().findById(convoId).withGraphFetched("members");
+};
+
+/**
+ * Get 2 users ' private conversation.
+ * @param {Number} user1Id
+ * @param {Number} user2Id
+ * @returns {Promise<Number>} Conversation ID if found.
+ */
+exports.getTwoUsersConvoId = (user1Id, user2Id, classroomId) => {
+  const knex = Conversation.knex();
+
+  return knex({ p: "participant" })
+    .select("c.id")
+    .innerJoin({ c: "conversation" }, "c.id", "p.conversation_id")
+    .whereIn("p.user_id", [user1Id, user2Id])
+    .andWhere("c.type", "single")
+    .andWhere("c.classroom_id", classroomId)
+    .groupBy("c.id")
+    .havingRaw("count(c.id) = 2")
+    .then((results) => results[0]);
 };

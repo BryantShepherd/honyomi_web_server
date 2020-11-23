@@ -21,8 +21,8 @@ class MessageNamespace {
     this.joinConvoChannels();
     this.socket.on(event.NEW_MESSAGE, this._newMessageHandler.bind(this));
     this.socket.on(
-      event.NEW_GROUP_CONVERSATION,
-      this._newGroupConversationHandler.bind(this)
+      event.CREATE_NEW_MESSAGE,
+      this.createNewMessageHandler.bind(this)
     );
   }
 
@@ -107,10 +107,11 @@ class MessageNamespace {
    * @param {Date | String} [data.scheduledAt]
    * @param {Function} fn
    */
-  async _newGroupConversationHandler(data, fn) {
+  async createNewGroupMessageHandler(data, fn) {
     const {
       sender,
       message,
+      messageText,
       createdAt,
       receiverIds,
       canReply,
@@ -121,7 +122,7 @@ class MessageNamespace {
     let allUserIds = [sender.id, ...receiverIds];
     try {
       // Create new conversation in db
-      let newConvoId = await messageService.createNewConversation(
+      let newConvo = await messageService.createNewConversation(
         {
           type: "group",
           creator_id: sender.id,
@@ -129,6 +130,11 @@ class MessageNamespace {
         },
         allUserIds
       );
+      
+      // Create default name
+      newConvo.conversation_name = "New Group";
+
+      let newConvoId = newConvo.id;
       // Subscribe all user involved to this conversation (socket.io)
       let newConvoChannel = `convo#${newConvoId}`;
 
@@ -144,28 +150,47 @@ class MessageNamespace {
       // Add new message in db
       let broadcastMessage = {
         sender: sender,
-        message: message.richText || message.text,
+        message: message || messageText,
+        messageText: messageText,
         createdAt: createdAt,
         conversationId: newConvoId,
         canReply: canReply || true,
         attachment: attachment,
       };
 
+      if (fn) fn(null, broadcastMessage);
+
       let newMessage = await messageService.insertMessage({
         sender_id: sender.id,
         conversation_id: newConvoId, //TODO: check if the user is in that conversation
-        message: message.richText || message.text,
-        message_text: message.text,
+        message: message || messageText,
+        message_text: messageText,
         attachment_id: attachment ? attachment.id : undefined,
       });
       broadcastMessage.id = newMessage.id;
 
       // Emit the new message to socket subscribing to this conversation
-      this.nsp.in(newConvoChannel).emit(event.NEW_MESSAGE, broadcastMessage);
+      this.nsp
+        .in(newConvoChannel)
+        .emit(event.FIRST_TIME_MESSAGE, { newMsg: broadcastMessage, newConvo });
     } catch (err) {
       debug(err);
       if (fn) fn(new Error(errorMsg.DEFAULT));
     }
+  }
+
+  createNewMessageHandler(data, fn) {
+    // TODO: Check if receiverIds property exist.
+    const receiverIds = data.receiverIds;
+    if (receiverIds.length === 1) {
+      this.createNewSingleMessageHandler(data, fn);
+    } else {
+      this.createNewGroupMessageHandler(data, fn);
+    }
+  }
+
+  createNewSingleMessageHandler(data, fn) {
+    fn(new Error("Method not implemented"));
   }
 }
 

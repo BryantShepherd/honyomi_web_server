@@ -16,4 +16,27 @@ router.get("/:convoId", async (req, res, next) => {
   }
 });
 
+router.get("/:convoId/members", async (req, res, next) => {
+  const convoId = req.params.convoId;
+
+  try {
+    let members = await messageService.getConversationMembers(convoId);
+
+    return responseUtil.success(res, 200, members);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/convo/:convoId/detail", (req, res, next) => {
+  const convoId = req.params.convoId;
+
+  messageService
+    .getConversationDetail(convoId)
+    .then((data) => {
+      return responseUtil.success(res, 200, data);
+    })
+    .catch(next);
+});
+
 module.exports = router;
