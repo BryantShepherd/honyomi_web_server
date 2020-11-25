@@ -103,6 +103,7 @@ class MessageNamespace {
    * @param {Object} [data.attachment]
    * @param {Number} data.classroomId
    * @param {Array<Number>} data.receiverIds
+   * @param {Array<Object>} data.receivers Receiver { id, name, avatarUrl? }
    * @param {Date | String} data.createdAt
    * @param {Date | String} [data.scheduledAt]
    * @param {Function} fn
@@ -113,11 +114,13 @@ class MessageNamespace {
       message,
       messageText,
       createdAt,
-      receiverIds,
       canReply,
       attachment,
       classroomId,
+      receivers,
     } = data;
+
+    const receiverIds = receivers.map((r) => r["id"]);
 
     let allUserIds = [sender.id, ...receiverIds];
     try {
@@ -130,7 +133,7 @@ class MessageNamespace {
         },
         allUserIds
       );
-      
+
       // Create default name
       newConvo.conversation_name = "New Group";
 
@@ -181,16 +184,114 @@ class MessageNamespace {
 
   createNewMessageHandler(data, fn) {
     // TODO: Check if receiverIds property exist.
-    const receiverIds = data.receiverIds;
-    if (receiverIds.length === 1) {
+    const receivers = data.receivers;
+    if (receivers.length === 1) {
       this.createNewSingleMessageHandler(data, fn);
     } else {
       this.createNewGroupMessageHandler(data, fn);
     }
   }
 
-  createNewSingleMessageHandler(data, fn) {
-    fn(new Error("Method not implemented"));
+  async createNewSingleMessageHandler(data, fn) {
+    const {
+      sender,
+      message,
+      messageText,
+      createdAt,
+      canReply,
+      attachment,
+      classroomId,
+      receivers,
+    } = data;
+
+    try {
+      const receiverIds = receivers.map((r) => r["id"]);
+
+      let convoIdIfExist = await messageService.getTwoUsersConvoId(
+        sender.id,
+        receiverIds[0],
+        classroomId
+      );
+
+      console.log(convoIdIfExist);
+      console.log(typeof convoIdIfExist);
+
+      if (convoIdIfExist !== null) {
+        return this._newMessageHandler({
+          sender,
+          message,
+          messageText,
+          createdAt,
+          conversationId: convoIdIfExist,
+          canReply,
+          attachment,
+        });
+      }
+
+      let allUserIds = [sender.id, receiverIds[0]];
+
+      // Create new conversation in db
+      let newConvo = await messageService.createNewConversation(
+        {
+          type: "single",
+          creator_id: sender.id,
+          classroom_id: classroomId,
+        },
+        allUserIds
+      );
+
+      let newConvoId = newConvo.id;
+      // Subscribe all user involved to this conversation (socket.io)
+      let newConvoChannel = `convo#${newConvoId}`;
+
+      // Get all clients of users inside this conversation and join
+      // them all.
+      let allUserChannels = allUserIds.map((id) => `user#${id}`);
+      allUserChannels.forEach((channel) => {
+        let sockets = Object.values(this.nsp.in(channel).sockets);
+        sockets.forEach((s) => {
+          s.join(newConvoChannel);
+        });
+      });
+
+      // Add new message in db
+      let broadcastMessage = {
+        sender: sender,
+        message: message || messageText,
+        messageText: messageText,
+        createdAt: createdAt,
+        conversationId: newConvoId,
+        canReply: canReply || true,
+        attachment: attachment,
+      };
+
+      if (fn) fn(null, broadcastMessage);
+
+      let newMessage = await messageService.insertMessage({
+        sender_id: sender.id,
+        conversation_id: newConvoId, //TODO: check if the user is in that conversation
+        message: message || messageText,
+        message_text: messageText,
+        attachment_id: attachment ? attachment.id : undefined,
+      });
+      broadcastMessage.id = newMessage.id;
+
+      // Emit the new message to socket subscribing to this conversation
+      let senderChannel = `user#${sender.id}`;
+      let receiverChannel = `user#${receivers[0].id}`;
+      newConvo.conversation_name = receivers[0].name;
+      this.nsp
+        .in(senderChannel)
+        .emit(event.FIRST_TIME_MESSAGE, { newMsg: broadcastMessage, newConvo });
+
+      newConvo.conversation_name = sender.name;
+      this.nsp
+        .in(receiverChannel)
+        .emit(event.FIRST_TIME_MESSAGE, { newMsg: broadcastMessage, newConvo });
+    } catch (err) {
+      debug(err);
+      if (fn) fn(new Error(errorMsg.DEFAULT));
+    }
   }
 }
 

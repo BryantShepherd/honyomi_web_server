@@ -80,5 +80,10 @@ exports.getTwoUsersConvoId = (user1Id, user2Id, classroomId) => {
     .andWhere("c.classroom_id", classroomId)
     .groupBy("c.id")
     .havingRaw("count(c.id) = 2")
-    .then((results) => results[0]);
+    .then((results) => {
+      if (results.length > 0) {
+        return results[0].id;
+      }
+      return null;
+    });
 };
