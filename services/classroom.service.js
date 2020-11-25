@@ -94,7 +94,7 @@ function createClassroom(classroom) {
  * @param {User} owner
  */
 function addOwnerClassroom(classroom, owner) {
-  return classroom.$relatedQuery("owner").relate(owner);
+  return classroom.$relatedQuery("owner").relate({ ...owner, type: "Owner" });
 }
 
 /**

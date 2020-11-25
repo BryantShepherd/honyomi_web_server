@@ -34,6 +34,9 @@ class Classroom extends Model {
         through: {
           from: "m_user_classroom.classroom_id",
           to: "m_user_classroom.user_id",
+          extra: {
+            type: "type",
+          },
         },
         to: "user.id",
       },
