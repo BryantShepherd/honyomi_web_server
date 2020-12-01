@@ -7,7 +7,7 @@ const User = require("../models/User");
  * @param query
  */
 function getClassroomOwner(user, query) {
-  return user.$relatedQuery("classroom_owner").where(query);
+  return user.$relatedQuery("classroom_owner").where(query).modify("withoutSetting");
 }
 
 /**
@@ -84,8 +84,8 @@ function leaveClassroom(user, classroom) {
  * Create new classroom
  * @param {Classroom} classroom
  */
-function createClassroom(classroom) {
-  return Classroom.query().insert(classroom);
+async function createClassroom(classroom) {
+  return Classroom.query().insertAndFetch(classroom);
 }
 
 /**

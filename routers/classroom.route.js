@@ -30,4 +30,6 @@ router.post("/:classroomId/students/leave", classroomController.leaveClassroom)
 
 router.get("/:classroomId/members", classroomController.getAllMembers);
 
+router.patch("/:classroomId/setting", classroomController.patchSetting);
+
 module.exports = router;
