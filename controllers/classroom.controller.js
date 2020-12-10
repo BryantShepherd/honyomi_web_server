@@ -220,6 +220,16 @@ function generateCode(length) {
   return result;
 }
 
+const getUserClassrooms = async (req, res, next) => {
+  const currentUser = req.user;
+  try {
+    let classrooms = await classroomService.getUserClassrooms(currentUser.id);
+    return responseUtil.success(res, 200, classrooms);
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 module.exports = {
   getClassrooms,
@@ -235,5 +245,6 @@ module.exports = {
   leaveClassroom,
   joinClassroomViaCode,
   getAllMembers,
-  patchSetting
+  patchSetting,
+  getUserClassrooms,
 };

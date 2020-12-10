@@ -25,6 +25,11 @@ exports.addFile = async (file, classroomId, message) => {
     });
 };
 
+exports.insertFile = (file) => {
+  const newFile = File.fromJson(file);
+  return File.query().insert(newFile);
+};
+
 exports.getClassroomFiles = (classroomId) => {
   const knex = File.knex();
   return knex({ c: "classroom" })

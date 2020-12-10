@@ -7,7 +7,10 @@ const User = require("../models/User");
  * @param query
  */
 function getClassroomOwner(user, query) {
-  return user.$relatedQuery("classroom_owner").where(query).modify("withoutSetting");
+  return user
+    .$relatedQuery("classroom_owner")
+    .where(query)
+    .modify("withoutSetting");
 }
 
 /**
@@ -23,13 +26,20 @@ function getAllClassrooms(query) {
   return Classroom.query().where(query);
 }
 
+function getUserClassrooms(userId) {
+  const knex = Classroom.knex();
+  return knex({ c: "classroom" })
+    .select("c.*", "msc.type")
+    .innerJoin({ msc: "m_user_classroom" }, "c.id", "msc.classroom_id")
+    .where("msc.user_id", userId);
+}
+
 /**
  *
  * @param {int} classroomId
  */
 function getClassroom(classroomId) {
-  return Classroom.query()
-      .findById(classroomId);
+  return Classroom.query().findById(classroomId);
 }
 
 function getClassroomViaCode(classroomCode) {
@@ -75,9 +85,7 @@ function joinClassroom(user, classroom) {
  * @param {Classroom} classroom
  */
 function leaveClassroom(user, classroom) {
-  return classroom.$relatedQuery("students")
-      .unrelate()
-      .where(user);
+  return classroom.$relatedQuery("students").unrelate().where(user);
 }
 
 /**
@@ -123,6 +131,8 @@ function patchClassroom(classroom, newClassroom) {
   return classroom.$query().patchAndFetch(newClassroom);
 }
 
+function updateClassroomAvatar(classroom, avatarUrl) {}
+
 module.exports = {
   getAllClassrooms,
   getClassroom,
@@ -139,4 +149,5 @@ module.exports = {
   getClassroomOwner,
   getClassroomJoined,
   getAllMembers,
+  getUserClassrooms,
 };

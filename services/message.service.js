@@ -10,6 +10,14 @@ exports.insertMessage = (message) => {
   return Message.query().insert(newMessage);
 };
 
+/**
+ * @param {Object} messageWithAttachment
+ * @param {Object} messageWithAttachment.attachment
+ */
+exports.insertMessageWithAttachment = async (messageWithAttachment) => {
+  return Message.query().insertGraph(messageWithAttachment);
+};
+
 exports.getConversationMessages = (conversationId) => {
   //TODO: Use pagination
   return Message.query()

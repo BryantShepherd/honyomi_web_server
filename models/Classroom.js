@@ -6,40 +6,36 @@ const _ = require("lodash");
 Model.knex(knex);
 
 class Classroom extends Model {
-
   static get tableName() {
     return "classroom";
   }
 
   static get virtualAttributes() {
-    return ["setting"]
+    return ["setting"];
   }
 
   setting() {
     return {
       require_approval: this.require_approval,
       participant_messaging: this.participant_messaging,
-      message_with_children: this.message_with_children
-    }
+      message_with_children: this.message_with_children,
+    };
   }
 
   static modifiers = {
     withoutSetting(builder) {
       return builder.select(
-          "classroom.id",
-          "classroom.code",
-          "classroom.name",
-          "classroom.school"
-      )
+        "classroom.id",
+        "classroom.code",
+        "classroom.name",
+        "classroom.school"
+      );
     },
 
     setting(builder) {
-      return builder.select(
-          "classroom.id",
-          "classroom.setting",
-      )
+      return builder.select("classroom.id", "classroom.setting");
     },
-  }
+  };
 
   $formatJson(json) {
     let _json = super.$formatJson(json);
@@ -51,20 +47,20 @@ class Classroom extends Model {
       type: "object",
       required: ["code", "name", "school"],
       properties: {
-        code: {type: "string", maxlength: 6},
-        name: {type: "string", maxlength: 200},
-        school: {type: "string", maxlength: 200},
+        code: { type: "string", maxlength: 6 },
+        name: { type: "string", maxlength: 200 },
+        school: { type: "string", maxlength: 200 },
         setting: {
           type: "object",
           properties: {
-            require_approval: {type: "boolean"},
+            require_approval: { type: "boolean" },
             participant_messaging: {
               type: "string",
-              enum: ["on", "off", "role-based"]
+              enum: ["on", "off", "role-based"],
             },
-            message_with_children: {type: "boolean"}
-          }
-        }
+            message_with_children: { type: "boolean" },
+          },
+        },
       },
     };
   }
@@ -105,7 +101,14 @@ class Classroom extends Model {
       relation: Model.ManyToManyRelation,
       modelClass: User,
       filter: (query) =>
-        query.select("id", "name", "email", "type", "joined_date"),
+        query.select(
+          "id",
+          "name",
+          "email",
+          "type",
+          "avatar_url",
+          "joined_date"
+        ),
       join: {
         from: "classroom.id",
         through: {

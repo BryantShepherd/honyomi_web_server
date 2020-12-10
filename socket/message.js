@@ -1,7 +1,7 @@
 const event = require("../config").SocketIOEvent.message;
 const errorMsg = require("../config").SocketErrorMessage;
 const Message = require("../models/Message");
-const { messageService, userService } = require("../services");
+const { messageService, userService, fileService } = require("../services");
 const scheduleUtil = require("../utils/scheduleUtils");
 const debug = require("debug")("remind-clone:socket:message");
 
@@ -76,7 +76,12 @@ class MessageNamespace {
     };
     //TODO: Implement scheduled message
     if (fn) fn(null, broadcastMessage);
+    console.log(message);
     try {
+      if (message.attachment != null) {
+        let newFile = await fileService.insertFile(message.attachment);
+        message.attachment.id = newFile.id;
+      }
       let newMessage = await messageService.insertMessage({
         sender_id: message.sender.id,
         conversation_id: message.conversationId, //TODO: check if the user is in that conversation
@@ -86,7 +91,6 @@ class MessageNamespace {
       });
       broadcastMessage.id = newMessage.id;
       let convoChannel = `convo#${broadcastMessage.conversationId}`;
-      console.log(newMessage, broadcastMessage);
       this.nsp.in(convoChannel).emit(event.NEW_MESSAGE, broadcastMessage);
     } catch (err) {
       debug(err);

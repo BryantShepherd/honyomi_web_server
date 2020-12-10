@@ -48,7 +48,7 @@ class Message extends Model {
         },
       },
       attachment: {
-        relation: Model.HasOneRelation,
+        relation: Model.BelongsToOneRelation,
         modelClass: require("./File"),
         join: {
           from: "message.attachment_id",

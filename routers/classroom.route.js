@@ -9,6 +9,8 @@ router.route("/")
   .get(classroomController.getClassrooms)
   .post(classroomController.postClassroom)
 
+router.get("/my-class", classroomController.getUserClassrooms);
+
 router.post("/join/:classroomCode", classroomController.joinClassroomViaCode);
 
 router.use('/:classroomId', classroomController.middleware)
